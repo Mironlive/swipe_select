@@ -207,11 +207,33 @@ SwipeSelect<String>(
 
 ### `SwipeSelectController<K>`
 
-`selected`, `selectedCount`, `isSelected(key)`, `isSelectionMode`, `selectionMode` (включить / выключить принудительно), `isDragging`, `toggle`, `select`, `deselect`, `setSelection`, `selectAll(keys)`, `clear`, `sync(keys)`, `onChanged`.
+`selected` (неизменяемое представление, без копирования), `selectedCount`, `isSelected(key)`, `isSelectionMode`, `selectionMode` (включить / выключить принудительно), `isDragging`, `autoScrollDirection` (`ValueListenable<int>`), `toggle`, `select`, `deselect`, `setSelection`, `selectAll(keys)`, `clear`, `sync(keys)`, `onChanged`.
 
 ### `SwipeSelectItem`
 
 `SwipeSelectItem(index: i, child: …)` или `SwipeSelectItem(index: i, builder: (context, selected) => …)`.
+
+## Производительность
+
+Ленивые списки остаются ленивыми: регистрируются только отрисованные элементы, поэтому даже при 10 000 элементов виджет проверяет 20–40 строк на экране. Строки, ушедшие за экран, всё равно отмечаются — по индексу через `keyForIndex`.
+
+| Когда | Что делает пакет |
+| --- | --- |
+| В покое | ничего — тикер автоскролла остановлен |
+| Палец двигается | проверяет границы отрисованных элементов |
+| Палец на новом элементе | применяет только разницу диапазонов; перестраиваются только строки, где изменилась отметка |
+| Автоскролл | `ScrollPosition.jumpTo` раз в кадр |
+| Конец жеста | один `onChanged` |
+
+CPU example-приложения, profile-сборка на Android-эмуляторе (цифры относительные — эмулятор меряет CPU хоста):
+
+| Сценарий | CPU |
+| --- | --- |
+| Покой, список на экране | 0,2% |
+| Обычный скролл, без жеста | 9,8% |
+| Выделение с непрерывным автоскроллом | 16,5% |
+
+Подсветить зону у края во время автоскролла: `controller.autoScrollDirection` — `ValueListenable<int>` (-1 к верху / левому краю, 0, 1 к низу / правому).
 
 ## Как это работает
 

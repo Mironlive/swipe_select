@@ -10,3 +10,5 @@ First public release.
 - Non-selectable items, forced selection mode, `onChanged` once per gesture
 - Data changes mid-gesture are remapped by key
 - `SwipeSelectItem.builder` rebuilds only rows whose selection changed
+- `controller.selected` is an unmodifiable view (no copying); `controller.autoScrollDirection` for highlighting the edge zone
+- Range bookkeeping is O(Δ) per step — long ranges (thousands of rows) stay cheap

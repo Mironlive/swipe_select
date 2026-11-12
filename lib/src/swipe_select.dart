@@ -109,8 +109,8 @@ class SwipeSelect<K> extends StatefulWidget {
 
 class _DragSession<K> {
   _DragSession({required this.initial, required this.mode, required this.anchorIndex, required this.anchorKey})
-    : hoverIndex = anchorIndex,
-      hoverKey = anchorKey;
+      : hoverIndex = anchorIndex,
+        hoverKey = anchorKey;
 
   final Set<K> initial;
   final DragMode mode;
@@ -327,13 +327,41 @@ class _SwipeSelectState<K> extends State<SwipeSelect<K>>
       keyForIndex: (i) => i >= 0 && i < count ? widget.keyForIndex(i) : null,
       isSelectable: widget.isSelectable,
     );
+    _updateRangeKeys(drag, drag.range, next);
     drag.range = next;
-    drag.rangeKeys = {
-      for (var i = start; i <= end; i++)
-        if (i >= 0 && i < count) widget.keyForIndex(i),
-    };
     if (result.changed) widget.controller.internalUpdate(result.next);
   }
+
+  /// Keeps [_DragSession.rangeKeys] in sync with the range — only the difference
+  /// between the old and the new range is touched, O(Δ) instead of O(range).
+  void _updateRangeKeys(_DragSession<K> drag, IndexRange? previous, IndexRange next) {
+    final count = widget.itemCount;
+    final keys = drag.rangeKeys;
+    void walk(int from, int to, {required bool add}) {
+      for (var i = from; i <= to; i++) {
+        if (i < 0 || i >= count) continue;
+        final key = widget.keyForIndex(i);
+        if (add) {
+          keys.add(key);
+        } else {
+          keys.remove(key);
+        }
+      }
+    }
+
+    if (previous == null) {
+      keys.clear();
+      walk(next.start, next.end, add: true);
+      return;
+    }
+    if (previous.start < next.start) walk(previous.start, _minInt(previous.end, next.start - 1), add: false);
+    if (previous.end > next.end) walk(_maxInt(previous.start, next.end + 1), previous.end, add: false);
+    if (next.start < previous.start) walk(next.start, _minInt(next.end, previous.start - 1), add: true);
+    if (next.end > previous.end) walk(_maxInt(next.start, previous.end + 1), next.end, add: true);
+  }
+
+  static int _minInt(int a, int b) => a < b ? a : b;
+  static int _maxInt(int a, int b) => a > b ? a : b;
 
   /// Data changed mid-gesture: indices shifted, remap anchor and range by key.
   void _remapAfterDataChange(_DragSession<K> drag) {
@@ -388,6 +416,7 @@ class _SwipeSelectState<K> extends State<SwipeSelect<K>>
     final size = vertical ? viewport.height : viewport.width;
     final direction = local < config.edgeSize ? -1 : (local > size - config.edgeSize ? 1 : 0);
     _autoDirection = direction;
+    widget.controller.internalSetAutoScrollDirection(direction);
     if (direction == 0) {
       _stopAutoScroll();
     } else if (!_ticker.isActive) {
@@ -398,6 +427,7 @@ class _SwipeSelectState<K> extends State<SwipeSelect<K>>
 
   void _stopAutoScroll() {
     _autoDirection = 0;
+    widget.controller.internalSetAutoScrollDirection(0);
     if (_ticker.isActive) _ticker.stop();
     _lastTick = null;
   }

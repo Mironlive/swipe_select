@@ -39,7 +39,7 @@ class SwipeSelectScope extends InheritedWidget {
 /// whole list. Use [child] if you rebuild rows yourself.
 class SwipeSelectItem extends StatefulWidget {
   const SwipeSelectItem({super.key, required this.index, this.child, this.builder})
-    : assert(child != null || builder != null, 'Pass child or builder');
+      : assert(child != null || builder != null, 'Pass child or builder');
 
   /// The item's index — the same one your list builder received.
   final int index;

@@ -178,10 +178,13 @@ void main() {
   testWidgets('long press anywhere enters selection mode, then the drag extends it', (tester) async {
     final c = SwipeSelectController<String>();
     await tester.pumpWidget(Harness(controller: c, activation: const [SwipeSelectActivation.longPress()]));
-    final g = await dragPath(tester, [
-      rowCenter(2, x: 200),
-      rowCenter(4, x: 200),
-    ], hold: const Duration(milliseconds: 400));
+    final g = await dragPath(
+        tester,
+        [
+          rowCenter(2, x: 200),
+          rowCenter(4, x: 200),
+        ],
+        hold: const Duration(milliseconds: 400));
     await g.up();
     await tester.pump();
     expect(c.selected, {'id2', 'id3', 'id4'});
@@ -241,10 +244,13 @@ void main() {
     );
     final h = tester.getSize(find.byType(ListView)).height;
     final first = tester.getCenter(find.byKey(const ValueKey('id1')));
-    final g = await dragPath(tester, [
-      Offset(200, first.dy),
-      const Offset(200, 8),
-    ], hold: const Duration(milliseconds: 400));
+    final g = await dragPath(
+        tester,
+        [
+          Offset(200, first.dy),
+          const Offset(200, 8),
+        ],
+        hold: const Duration(milliseconds: 400));
     for (var i = 0; i < 40; i++) {
       await tester.pump(const Duration(milliseconds: 16));
     }
@@ -365,5 +371,52 @@ void main() {
     c.toggle('r3');
     await tester.pump();
     expect(builds.keys, [3]);
+  });
+
+  testWidgets('autoScrollDirection reports the edge zone while auto-scrolling', (tester) async {
+    final c = SwipeSelectController<String>(initialSelection: {'id0'});
+    final seen = <int>{};
+    c.autoScrollDirection.addListener(() => seen.add(c.autoScrollDirection.value));
+    await tester.pumpWidget(Harness(controller: c));
+    final bottom = tester.getSize(find.byType(ListView)).height - 10;
+    final g = await dragPath(tester, [rowCenter(1), Offset(28, bottom)]);
+    for (var i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    expect(c.autoScrollDirection.value, 1);
+    await g.up();
+    await tester.pump();
+    expect(c.autoScrollDirection.value, 0);
+    expect(seen, containsAll(<int>{1, 0}));
+  });
+
+  test('selected is a snapshot view — kept values do not change later', () {
+    final c = SwipeSelectController<String>(initialSelection: {'a'});
+    final before = c.selected;
+    c.toggle('b');
+    expect(before, {'a'});
+    expect(c.selected, {'a', 'b'});
+    expect(() => (c.selected as dynamic).add('x'), throwsUnsupportedError);
+  });
+
+  testWidgets('long range (2000 rows) with auto-scroll stays contiguous and data remap works', (tester) async {
+    final c = SwipeSelectController<String>(initialSelection: {'id0'});
+    final key = GlobalKey<HarnessState>();
+    await tester.pumpWidget(Harness(key: key, controller: c, count: 2000));
+    final bottom = tester.getSize(find.byType(ListView)).height - 4;
+    final g = await dragPath(tester, [rowCenter(1), Offset(28, bottom)]);
+    for (var i = 0; i < 240; i++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    final selectedBefore = c.selectedCount;
+    expect(selectedBefore, greaterThan(40));
+    key.currentState!.prepend('fresh');
+    await tester.pump();
+    await g.up();
+    await tester.pump();
+    expect(c.isSelected('fresh'), isFalse);
+    for (var i = 0; i < selectedBefore - 1; i++) {
+      expect(c.isSelected('id$i'), isTrue, reason: 'id$i');
+    }
   });
 }

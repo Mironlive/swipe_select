@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/foundation.dart';
 
 import 'activation.dart';
@@ -13,8 +15,8 @@ typedef SelectionChangedCallback<K> = void Function(Set<K> selected, SelectionCh
 /// sync with Bloc / Riverpod / Redux without dozens of updates per second.
 class SwipeSelectController<K> extends ChangeNotifier {
   SwipeSelectController({Iterable<K>? initialSelection, this.onChanged, bool? selectionMode})
-    : _selected = Set<K>.of(initialSelection ?? const []),
-      _forcedSelectionMode = selectionMode;
+      : _selected = Set<K>.of(initialSelection ?? const []),
+        _forcedSelectionMode = selectionMode;
 
   /// See [SelectionChangedCallback].
   SelectionChangedCallback<K>? onChanged;
@@ -23,8 +25,10 @@ class SwipeSelectController<K> extends ChangeNotifier {
   bool? _forcedSelectionMode;
   bool _isDragging = false;
 
-  /// Current selection. A new, unmodifiable set on every change.
-  Set<K> get selected => Set<K>.unmodifiable(_selected);
+  /// Current selection as an unmodifiable view — no copying, cheap to read in `build`.
+  /// The underlying set is replaced (never mutated) on every change, so a view you
+  /// kept stays a stable snapshot.
+  Set<K> get selected => UnmodifiableSetView<K>(_selected);
 
   int get selectedCount => _selected.length;
 
@@ -44,6 +48,11 @@ class SwipeSelectController<K> extends ChangeNotifier {
 
   /// A finger is dragging a selection right now.
   bool get isDragging => _isDragging;
+
+  /// On-screen auto-scroll direction: -1 towards the start (top / left), 0, 1 towards the end.
+  /// Listen to it to highlight the edge zone while the list auto-scrolls.
+  ValueListenable<int> get autoScrollDirection => _autoScrollDirection;
+  final ValueNotifier<int> _autoScrollDirection = ValueNotifier<int>(0);
 
   void toggle(K key) {
     final next = Set<K>.of(_selected);
@@ -87,6 +96,14 @@ class SwipeSelectController<K> extends ChangeNotifier {
     if (identical(next, _selected)) return;
     _selected = next;
     notifyListeners();
+  }
+
+  void internalSetAutoScrollDirection(int value) => _autoScrollDirection.value = value;
+
+  @override
+  void dispose() {
+    _autoScrollDirection.dispose();
+    super.dispose();
   }
 
   void internalSetDragging(bool value) {

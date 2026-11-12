@@ -189,6 +189,15 @@ SwipeSelect<String>(
 
 The package draws nothing: checkboxes, highlights, counters and toolbars are yours. Use `controller.isSelectionMode`, `controller.isDragging`, `controller.selectedCount`.
 
+Highlight the edge zone while the list auto-scrolls:
+
+```dart
+ValueListenableBuilder<int>(
+  valueListenable: controller.autoScrollDirection, // -1 towards the top / left, 0, 1 towards the bottom / right
+  builder: (context, direction, _) => AnimatedOpacity(opacity: direction == 1 ? 1 : 0, duration: const Duration(milliseconds: 150), child: const BottomGlow()),
+)
+```
+
 ## API
 
 ### `SwipeSelect<K>`
@@ -207,11 +216,31 @@ The package draws nothing: checkboxes, highlights, counters and toolbars are you
 
 ### `SwipeSelectController<K>`
 
-`selected`, `selectedCount`, `isSelected(key)`, `isSelectionMode`, `selectionMode` (force on / off), `isDragging`, `toggle`, `select`, `deselect`, `setSelection`, `selectAll(keys)`, `clear`, `sync(keys)`, `onChanged`.
+`selected` (an unmodifiable view, no copying), `selectedCount`, `isSelected(key)`, `isSelectionMode`, `selectionMode` (force on / off), `isDragging`, `autoScrollDirection` (`ValueListenable<int>`), `toggle`, `select`, `deselect`, `setSelection`, `selectAll(keys)`, `clear`, `sync(keys)`, `onChanged`.
 
 ### `SwipeSelectItem`
 
 `SwipeSelectItem(index: i, child: …)` or `SwipeSelectItem(index: i, builder: (context, selected) => …)`.
+
+## Performance
+
+Lazy lists stay lazy: only mounted items are registered, so even with 10,000 items the widget checks the 20–40 rows on screen. Items that scrolled away still get selected — by index, through `keyForIndex`.
+
+| When | What the package does |
+| --- | --- |
+| At rest | nothing — the auto-scroll ticker is stopped |
+| Finger moves | checks the bounds of the mounted items |
+| Finger enters a new item | applies only the difference between ranges; only rows whose selection changed rebuild |
+| Auto-scroll | `ScrollPosition.jumpTo` once per frame |
+| Gesture ends | one `onChanged` |
+
+CPU of the example app, profile build on an Android emulator (relative numbers — the emulator measures the host CPU):
+
+| Scenario | CPU |
+| --- | --- |
+| At rest, list on screen | 0.2% |
+| Plain scrolling, no gesture | 9.8% |
+| Drag-select with continuous auto-scroll | 16.5% |
 
 ## How it works
 
