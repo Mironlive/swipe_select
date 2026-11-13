@@ -11,11 +11,15 @@
   <a href="https://github.com/Mironlive/swipe_select/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="лицензия MIT"></a>
 </p>
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/Mironlive/swipe_select/main/doc/media/hero.gif" width="280" alt="Долгое нажатие на письмо, появляются чекбоксы, ведение по колонке чекбоксов с автоскроллом">
-  &nbsp;
-  <img src="https://raw.githubusercontent.com/Mironlive/swipe_select/main/doc/media/grid.gif" width="280" alt="Сетка фото: долгое нажатие, затем свайп поперёк выделяет ряды">
-</p>
+<table align="center">
+  <tr><th colspan="2">iOS</th><th colspan="2">Android</th></tr>
+  <tr>
+    <td><img src="https://raw.githubusercontent.com/Mironlive/swipe_select/main/doc/media/hero.gif" width="200" alt="Долгое нажатие на письмо, появляются чекбоксы, ведение по колонке чекбоксов с автоскроллом"></td>
+    <td><img src="https://raw.githubusercontent.com/Mironlive/swipe_select/main/doc/media/grid.gif" width="200" alt="Сетка фото: долгое нажатие, затем свайп поперёк выделяет ряды"></td>
+    <td><img src="https://raw.githubusercontent.com/Mironlive/swipe_select/main/doc/media/android_hero.gif" width="200" alt="Android: удержание, затем протяжка по чекбоксам"></td>
+    <td><img src="https://raw.githubusercontent.com/Mironlive/swipe_select/main/doc/media/android_grid.gif" width="200" alt="Android: сетка фото"></td>
+  </tr>
+</table>
 
 <p align="center"><a href="https://github.com/Mironlive/swipe_select#readme">English</a> · Русский</p>
 
@@ -255,6 +259,14 @@ CPU example-приложения, profile-сборка на Android-эмулят
 ```bash
 cd example && flutter run
 ```
+
+Ещё сценарии на Android: полоса справа, чат (`reverse`), горизонтальный список.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Mironlive/swipe_select/main/doc/media/android_edge_end.gif" width="180" alt="Полоса справа">
+  <img src="https://raw.githubusercontent.com/Mironlive/swipe_select/main/doc/media/android_chat.gif" width="180" alt="Чат, перевёрнутый список">
+  <img src="https://raw.githubusercontent.com/Mironlive/swipe_select/main/doc/media/android_horizontal.gif" width="180" alt="Горизонтальный список">
+</p>
 
 ## Автор
 

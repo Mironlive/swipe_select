@@ -11,11 +11,15 @@
   <a href="https://github.com/Mironlive/swipe_select/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT license"></a>
 </p>
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/Mironlive/swipe_select/main/doc/media/hero.gif" width="280" alt="Long press an email, checkboxes appear, drag along the checkbox column with auto-scroll">
-  &nbsp;
-  <img src="https://raw.githubusercontent.com/Mironlive/swipe_select/main/doc/media/grid.gif" width="280" alt="Photo grid: long press, then swipe sideways to select rows">
-</p>
+<table align="center">
+  <tr><th colspan="2">iOS</th><th colspan="2">Android</th></tr>
+  <tr>
+    <td><img src="https://raw.githubusercontent.com/Mironlive/swipe_select/main/doc/media/hero.gif" width="200" alt="Long press an email, checkboxes appear, drag along the checkbox column with auto-scroll"></td>
+    <td><img src="https://raw.githubusercontent.com/Mironlive/swipe_select/main/doc/media/grid.gif" width="200" alt="Photo grid: long press, then swipe sideways to select rows"></td>
+    <td><img src="https://raw.githubusercontent.com/Mironlive/swipe_select/main/doc/media/android_hero.gif" width="200" alt="Android: long press, then drag along the checkboxes"></td>
+    <td><img src="https://raw.githubusercontent.com/Mironlive/swipe_select/main/doc/media/android_grid.gif" width="200" alt="Android: photo grid"></td>
+  </tr>
+</table>
 
 <p align="center">English · <a href="https://github.com/Mironlive/swipe_select/blob/main/README.ru.md">Русский</a></p>
 
@@ -262,6 +266,14 @@ CPU of the example app, profile build on an Android emulator (relative numbers �
 ```bash
 cd example && flutter run
 ```
+
+More scenarios on Android: right edge strip, chat (`reverse`), horizontal list.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Mironlive/swipe_select/main/doc/media/android_edge_end.gif" width="180" alt="Right edge strip">
+  <img src="https://raw.githubusercontent.com/Mironlive/swipe_select/main/doc/media/android_chat.gif" width="180" alt="Chat, reverse list">
+  <img src="https://raw.githubusercontent.com/Mironlive/swipe_select/main/doc/media/android_horizontal.gif" width="180" alt="Horizontal list">
+</p>
 
 ## Author
 

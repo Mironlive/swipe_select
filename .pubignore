@@ -40,3 +40,4 @@ example/.dart_tool/
 example/ios/Pods/
 example/android/.gradle/
 **/*.iml
+doc/media/android_*
