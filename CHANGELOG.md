@@ -1,3 +1,7 @@
+## 0.1.3
+
+- Simpler internals: auto-scroll zone computed in one place, data changes mid-gesture re-apply the range from the initial selection instead of tracking keys. No API changes.
+
 ## 0.1.2
 
 - README: links to the React Native, SwiftUI and Jetpack Compose versions.

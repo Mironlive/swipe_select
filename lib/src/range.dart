@@ -1,3 +1,5 @@
+import 'dart:math' show max, min;
+
 /// An inclusive range of item indices.
 class IndexRange {
   const IndexRange(this.start, this.end);
@@ -65,23 +67,20 @@ RangeTransitionResult<K> applyRangeTransition<K>({
   } else {
     // Left the range — restore the initial state.
     if (previousRange.start < nextRange.start) {
-      apply(previousRange.start, _min(previousRange.end, nextRange.start - 1), restore: true);
+      apply(previousRange.start, min(previousRange.end, nextRange.start - 1), restore: true);
     }
     if (previousRange.end > nextRange.end) {
-      apply(_max(previousRange.start, nextRange.end + 1), previousRange.end, restore: true);
+      apply(max(previousRange.start, nextRange.end + 1), previousRange.end, restore: true);
     }
     // Entered the range — apply the gesture mode.
     if (nextRange.start < previousRange.start) {
-      apply(nextRange.start, _min(nextRange.end, previousRange.start - 1), restore: false);
+      apply(nextRange.start, min(nextRange.end, previousRange.start - 1), restore: false);
     }
     if (nextRange.end > previousRange.end) {
-      apply(_max(nextRange.start, previousRange.end + 1), nextRange.end, restore: false);
+      apply(max(nextRange.start, previousRange.end + 1), nextRange.end, restore: false);
     }
   }
 
   final result = next;
   return result == null ? RangeTransitionResult<K>(current, false) : RangeTransitionResult<K>(result, true);
 }
-
-int _min(int a, int b) => a < b ? a : b;
-int _max(int a, int b) => a > b ? a : b;

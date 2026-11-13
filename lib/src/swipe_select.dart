@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
@@ -119,9 +121,6 @@ class _DragSession<K> {
   int hoverIndex;
   K hoverKey;
   IndexRange? range;
-
-  /// Keys inside [range] — used to restore them if the data changes mid-gesture.
-  Set<K> rangeKeys = <K>{};
 }
 
 class _SwipeSelectState<K> extends State<SwipeSelect<K>>
@@ -134,7 +133,6 @@ class _SwipeSelectState<K> extends State<SwipeSelect<K>>
 
   late final Ticker _ticker;
   Duration? _lastTick;
-  int _autoDirection = 0; // visual: -1 towards the start (top / left), 1 towards the end
 
   // ---------------- registry ----------------
 
@@ -299,8 +297,8 @@ class _SwipeSelectState<K> extends State<SwipeSelect<K>>
     final item = _hitTest(pointer);
     if (item == null) return;
     final index = item.index;
-    final start = index < drag.anchorIndex ? index : drag.anchorIndex;
-    final end = index > drag.anchorIndex ? index : drag.anchorIndex;
+    final start = math.min(index, drag.anchorIndex);
+    final end = math.max(index, drag.anchorIndex);
     final changedRange = drag.range != IndexRange(start, end);
     final changedHover = index != drag.hoverIndex;
     if (!changedRange && !changedHover) return;
@@ -327,43 +325,12 @@ class _SwipeSelectState<K> extends State<SwipeSelect<K>>
       keyForIndex: (i) => i >= 0 && i < count ? widget.keyForIndex(i) : null,
       isSelectable: widget.isSelectable,
     );
-    _updateRangeKeys(drag, drag.range, next);
     drag.range = next;
     if (result.changed) widget.controller.internalUpdate(result.next);
   }
 
-  /// Keeps [_DragSession.rangeKeys] in sync with the range — only the difference
-  /// between the old and the new range is touched, O(Δ) instead of O(range).
-  void _updateRangeKeys(_DragSession<K> drag, IndexRange? previous, IndexRange next) {
-    final count = widget.itemCount;
-    final keys = drag.rangeKeys;
-    void walk(int from, int to, {required bool add}) {
-      for (var i = from; i <= to; i++) {
-        if (i < 0 || i >= count) continue;
-        final key = widget.keyForIndex(i);
-        if (add) {
-          keys.add(key);
-        } else {
-          keys.remove(key);
-        }
-      }
-    }
-
-    if (previous == null) {
-      keys.clear();
-      walk(next.start, next.end, add: true);
-      return;
-    }
-    if (previous.start < next.start) walk(previous.start, _minInt(previous.end, next.start - 1), add: false);
-    if (previous.end > next.end) walk(_maxInt(previous.start, next.end + 1), previous.end, add: false);
-    if (next.start < previous.start) walk(next.start, _minInt(next.end, previous.start - 1), add: true);
-    if (next.end > previous.end) walk(_maxInt(next.start, previous.end + 1), next.end, add: true);
-  }
-
-  static int _minInt(int a, int b) => a < b ? a : b;
-  static int _maxInt(int a, int b) => a > b ? a : b;
-
-  /// Data changed mid-gesture: indices shifted, remap anchor and range by key.
+  /// Data changed mid-gesture: indices shifted. Find the anchor and the hovered
+  /// item by key and re-apply the range on top of the selection before the gesture.
   void _remapAfterDataChange(_DragSession<K> drag) {
     final count = widget.itemCount;
     if (drag.anchorIndex < count && widget.keyForIndex(drag.anchorIndex) == drag.anchorKey) return;
@@ -377,45 +344,38 @@ class _SwipeSelectState<K> extends State<SwipeSelect<K>>
 
     final anchor = indexOf(drag.anchorKey);
     if (anchor == -1) {
-      // The anchor item is gone — nothing to extend the range from.
-      _onEnd();
+      _onEnd(); // the anchor item is gone — nothing to extend the range from
       return;
     }
-    final hoverFound = indexOf(drag.hoverKey);
-    final hover = hoverFound == -1 ? anchor : hoverFound;
-
-    // Restore what the old range touched (by key), then apply the new range.
-    final next = Set<K>.of(widget.controller.internalSelection);
-    for (final key in drag.rangeKeys) {
-      if (drag.initial.contains(key)) {
-        next.add(key);
-      } else {
-        next.remove(key);
-      }
-    }
-    widget.controller.internalUpdate(next);
+    final hover = indexOf(drag.hoverKey);
     drag
       ..anchorIndex = anchor
-      ..hoverIndex = hover
+      ..hoverIndex = hover == -1 ? anchor : hover
       ..range = null;
-    _applyRange(anchor < hover ? anchor : hover, anchor > hover ? anchor : hover);
+    widget.controller.internalUpdate(Set<K>.of(drag.initial));
+    _applyRange(math.min(anchor, drag.hoverIndex), math.max(anchor, drag.hoverIndex));
   }
 
   // ---------------- auto-scroll ----------------
 
-  void _updateAutoScroll() {
+  /// Where the finger is relative to the auto-scroll zones: visual direction
+  /// (-1 towards the start, 1 towards the end, 0 outside) and depth into the zone, 0..1.
+  (int, double) _autoScrollZone() {
     final config = widget.autoScroll;
     final viewport = _viewportRect;
     final pointer = _pointer;
-    if (!config.enabled || viewport == null || pointer == null || _drag == null) {
-      _stopAutoScroll();
-      return;
-    }
+    if (!config.enabled || viewport == null || pointer == null || _drag == null) return (0, 0);
     final vertical = _axis == Axis.vertical;
     final local = vertical ? pointer.dy - viewport.top : pointer.dx - viewport.left;
     final size = vertical ? viewport.height : viewport.width;
-    final direction = local < config.edgeSize ? -1 : (local > size - config.edgeSize ? 1 : 0);
-    _autoDirection = direction;
+    final edge = config.edgeSize;
+    if (local < edge) return (-1, ((edge - local) / edge).clamp(0.0, 1.0));
+    if (local > size - edge) return (1, ((local - size + edge) / edge).clamp(0.0, 1.0));
+    return (0, 0);
+  }
+
+  void _updateAutoScroll() {
+    final (direction, _) = _autoScrollZone();
     widget.controller.internalSetAutoScrollDirection(direction);
     if (direction == 0) {
       _stopAutoScroll();
@@ -426,18 +386,14 @@ class _SwipeSelectState<K> extends State<SwipeSelect<K>>
   }
 
   void _stopAutoScroll() {
-    _autoDirection = 0;
     widget.controller.internalSetAutoScrollDirection(0);
     if (_ticker.isActive) _ticker.stop();
-    _lastTick = null;
   }
 
   void _onTick(Duration elapsed) {
     final position = _position;
-    final viewport = _viewportRect;
-    final pointer = _pointer;
-    final config = widget.autoScroll;
-    if (position == null || viewport == null || pointer == null || _drag == null || _autoDirection == 0) {
+    final (direction, depth) = _autoScrollZone();
+    if (position == null || direction == 0) {
       _stopAutoScroll();
       return;
     }
@@ -447,17 +403,13 @@ class _SwipeSelectState<K> extends State<SwipeSelect<K>>
     final dt = (elapsed - last).inMicroseconds / 1e6;
     if (dt <= 0) return;
 
-    final vertical = _axis == Axis.vertical;
-    final local = vertical ? pointer.dy - viewport.top : pointer.dx - viewport.left;
-    final size = vertical ? viewport.height : viewport.width;
-    final depth = _autoDirection < 0 ? config.edgeSize - local : local - (size - config.edgeSize);
-    final ratio = (depth / config.edgeSize).clamp(0.0, 1.0);
-    final speed = config.minSpeed + (config.maxSpeed - config.minSpeed) * ratio;
+    final config = widget.autoScroll;
+    final speed = config.minSpeed + (config.maxSpeed - config.minSpeed) * depth;
 
     // Visual direction → scroll offset direction. Reversed lists (chats) and
     // RTL horizontal lists grow their offset towards the visual start.
     final reversed = position.axisDirection == AxisDirection.up || position.axisDirection == AxisDirection.left;
-    final delta = (reversed ? -_autoDirection : _autoDirection) * speed * dt.clamp(0.0, 0.05);
+    final delta = (reversed ? -direction : direction) * speed * dt.clamp(0.0, 0.05);
     final target = (position.pixels + delta).clamp(position.minScrollExtent, position.maxScrollExtent);
     if (target == position.pixels) return;
     position.jumpTo(target);
