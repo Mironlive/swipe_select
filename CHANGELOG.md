@@ -1,3 +1,8 @@
+## 0.1.1
+
+- Shorter package description (pub.dev limit is 180 characters).
+- README: iOS and Android recordings side by side.
+
 ## 0.1.0
 
 First public release.
