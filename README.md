@@ -153,7 +153,7 @@ controller.sync(state.selectedIds); // no onChanged call
 ```
 
 - During a gesture the controller notifies listeners on every change (rows update live), but `onChanged` fires **once**, when the gesture ends.
-- `toggle`, `select`, `deselect`, `setSelection`, `selectAll`, `clear` also call `onChanged`; `reason` tells you why: `gesture`, `toggle` or `api`.
+- `toggle`, `select`, `deselect`, `setSelection`, `clear` also call `onChanged`; `reason` tells you why: `gesture`, `toggle` or `api`.
 
 ## Lists
 
@@ -220,7 +220,7 @@ ValueListenableBuilder<int>(
 
 ### `SwipeSelectController<K>`
 
-`selected` (an unmodifiable view, no copying), `selectedCount`, `isSelected(key)`, `isSelectionMode`, `selectionMode` (force on / off), `isDragging`, `autoScrollDirection` (`ValueListenable<int>`), `toggle`, `select`, `deselect`, `setSelection`, `selectAll(keys)`, `clear`, `sync(keys)`, `onChanged`.
+`selected` (an unmodifiable view, no copying), `selectedCount`, `isSelected(key)`, `isSelectionMode`, `selectionMode` (force on / off), `isDragging`, `autoScrollDirection` (`ValueListenable<int>`), `toggle`, `select`, `deselect`, `setSelection`, `clear`, `sync(keys)`, `onChanged`.
 
 ### `SwipeSelectItem`
 

@@ -104,7 +104,7 @@ class Toolbar<K> extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
-                TextButton(onPressed: () => controller.selectAll(all()), child: const Text('All')),
+                TextButton(onPressed: () => controller.setSelection(all()), child: const Text('All')),
                 TextButton(onPressed: controller.clear, child: const Text('Clear')),
               ],
             ),

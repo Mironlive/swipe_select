@@ -19,22 +19,14 @@ class IndexRange {
   String toString() => 'IndexRange($start..$end)';
 }
 
-/// Result of [applyRangeTransition].
-class RangeTransitionResult<K> {
-  const RangeTransitionResult(this.next, this.changed);
-
-  /// New selection. When [changed] is false, it is the same object as `current`.
-  final Set<K> next;
-  final bool changed;
-}
-
 /// Transition between two gesture ranges.
 ///
 /// Indices inside [nextRange] get [shouldSelect]. Indices that left the range go
 /// back to their state in [initial] (the selection when the gesture started).
 /// Only the difference between the two ranges is processed — O(Δ).
-/// The set is copied lazily, only on the first real change.
-RangeTransitionResult<K> applyRangeTransition<K>({
+/// The set is copied lazily, only on the first real change. Returns `null` when
+/// nothing changed.
+Set<K>? applyRangeTransition<K>({
   required Set<K> initial,
   required Set<K> current,
   required IndexRange? previousRange,
@@ -81,6 +73,5 @@ RangeTransitionResult<K> applyRangeTransition<K>({
     }
   }
 
-  final result = next;
-  return result == null ? RangeTransitionResult<K>(current, false) : RangeTransitionResult<K>(result, true);
+  return next;
 }

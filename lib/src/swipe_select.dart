@@ -1,13 +1,16 @@
+import 'dart:collection';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import 'activation.dart';
-import 'controller.dart';
 import 'item.dart';
 import 'range.dart';
 import 'recognizer.dart';
+
+part 'controller.dart';
 
 /// Event for [SwipeSelect.onDragStart].
 @immutable
@@ -150,7 +153,7 @@ class _SwipeSelectState<K> extends State<SwipeSelect<K>>
   @override
   bool isIndexSelected(int index) {
     if (index < 0 || index >= widget.itemCount) return false;
-    return widget.controller.internalSelection.contains(widget.keyForIndex(index));
+    return widget.controller._selected.contains(widget.keyForIndex(index));
   }
 
   @override
@@ -259,13 +262,13 @@ class _SwipeSelectState<K> extends State<SwipeSelect<K>>
     final mode = controller.isSelected(key) ? DragMode.deselect : DragMode.select;
 
     _drag = _DragSession<K>(
-      initial: Set<K>.of(controller.internalSelection),
+      initial: Set<K>.of(controller._selected),
       mode: mode,
       anchorIndex: index,
       anchorKey: key,
     );
     _applyRange(index, index);
-    controller.internalSetDragging(true);
+    controller._setDragging(true);
     widget.onDragStart?.call(SwipeSelectDragStart<K>(key, index, mode));
     _updateHover(isAutoScrolling: false);
     _updateAutoScroll();
@@ -284,9 +287,9 @@ class _SwipeSelectState<K> extends State<SwipeSelect<K>>
     _drag = null;
     _pointer = null;
     final controller = widget.controller;
-    controller.internalSetDragging(false);
+    controller._setDragging(false);
     if (drag == null) return;
-    controller.internalEndGesture(drag.initial);
+    controller._endGesture(drag.initial);
     widget.onDragEnd?.call(SwipeSelectDragEnd<K>(controller.selected, drag.mode));
   }
 
@@ -316,9 +319,9 @@ class _SwipeSelectState<K> extends State<SwipeSelect<K>>
     final drag = _drag!;
     final next = IndexRange(start, end);
     final count = widget.itemCount;
-    final result = applyRangeTransition<K>(
+    final changed = applyRangeTransition<K>(
       initial: drag.initial,
-      current: widget.controller.internalSelection,
+      current: widget.controller._selected,
       previousRange: drag.range,
       nextRange: next,
       shouldSelect: drag.mode == DragMode.select,
@@ -326,7 +329,7 @@ class _SwipeSelectState<K> extends State<SwipeSelect<K>>
       isSelectable: widget.isSelectable,
     );
     drag.range = next;
-    if (result.changed) widget.controller.internalUpdate(result.next);
+    if (changed != null) widget.controller._update(changed);
   }
 
   /// Data changed mid-gesture: indices shifted. Find the anchor and the hovered
@@ -352,7 +355,7 @@ class _SwipeSelectState<K> extends State<SwipeSelect<K>>
       ..anchorIndex = anchor
       ..hoverIndex = hover == -1 ? anchor : hover
       ..range = null;
-    widget.controller.internalUpdate(Set<K>.of(drag.initial));
+    widget.controller._update(Set<K>.of(drag.initial));
     _applyRange(math.min(anchor, drag.hoverIndex), math.max(anchor, drag.hoverIndex));
   }
 
@@ -376,7 +379,7 @@ class _SwipeSelectState<K> extends State<SwipeSelect<K>>
 
   void _updateAutoScroll() {
     final (direction, _) = _autoScrollZone();
-    widget.controller.internalSetAutoScrollDirection(direction);
+    widget.controller._autoScrollDirection.value = direction;
     if (direction == 0) {
       _stopAutoScroll();
     } else if (!_ticker.isActive) {
@@ -386,7 +389,7 @@ class _SwipeSelectState<K> extends State<SwipeSelect<K>>
   }
 
   void _stopAutoScroll() {
-    widget.controller.internalSetAutoScrollDirection(0);
+    widget.controller._autoScrollDirection.value = 0;
     if (_ticker.isActive) _ticker.stop();
   }
 

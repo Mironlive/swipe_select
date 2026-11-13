@@ -153,7 +153,7 @@ controller.sync(state.selectedIds); // без вызова onChanged
 ```
 
 - Во время жеста контроллер уведомляет слушателей на каждом изменении (строки обновляются вживую), но `onChanged` вызывается **один раз**, когда жест заканчивается.
-- `toggle`, `select`, `deselect`, `setSelection`, `selectAll`, `clear` тоже вызывают `onChanged`; `reason` говорит, откуда изменение: `gesture`, `toggle` или `api`.
+- `toggle`, `select`, `deselect`, `setSelection`, `clear` тоже вызывают `onChanged`; `reason` говорит, откуда изменение: `gesture`, `toggle` или `api`.
 
 ## Списки
 
@@ -211,7 +211,7 @@ SwipeSelect<String>(
 
 ### `SwipeSelectController<K>`
 
-`selected` (неизменяемое представление, без копирования), `selectedCount`, `isSelected(key)`, `isSelectionMode`, `selectionMode` (включить / выключить принудительно), `isDragging`, `autoScrollDirection` (`ValueListenable<int>`), `toggle`, `select`, `deselect`, `setSelection`, `selectAll(keys)`, `clear`, `sync(keys)`, `onChanged`.
+`selected` (неизменяемое представление, без копирования), `selectedCount`, `isSelected(key)`, `isSelectionMode`, `selectionMode` (включить / выключить принудительно), `isDragging`, `autoScrollDirection` (`ValueListenable<int>`), `toggle`, `select`, `deselect`, `setSelection`, `clear`, `sync(keys)`, `onChanged`.
 
 ### `SwipeSelectItem`
 

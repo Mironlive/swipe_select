@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:swipe_select/swipe_select.dart';
+import 'package:swipe_select/src/range.dart';
 
 final _keys = List.generate(20, (i) => 'k$i');
 String? _keyForIndex(int i) => i >= 0 && i < _keys.length ? _keys[i] : null;
@@ -16,14 +16,15 @@ List<String> _drag(List<String> initial, int anchor, List<int> path, {bool Funct
   for (final index in [anchor, ...path]) {
     final next = IndexRange(index < anchor ? index : anchor, index > anchor ? index : anchor);
     current = applyRangeTransition<String>(
-      initial: start,
-      current: current,
-      previousRange: previous,
-      nextRange: next,
-      shouldSelect: shouldSelect,
-      keyForIndex: _keyForIndex,
-      isSelectable: selectable,
-    ).next;
+          initial: start,
+          current: current,
+          previousRange: previous,
+          nextRange: next,
+          shouldSelect: shouldSelect,
+          keyForIndex: _keyForIndex,
+          isSelectable: selectable,
+        ) ??
+        current;
     previous = next;
   }
   return _sorted(current);
@@ -56,7 +57,6 @@ void main() {
       shouldSelect: true,
       keyForIndex: _keyForIndex,
     );
-    expect(r.changed, isFalse);
-    expect(identical(r.next, current), isTrue);
+    expect(r, isNull);
   });
 }

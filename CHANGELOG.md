@@ -1,3 +1,8 @@
+## 0.2.0
+
+- Breaking: `IndexRange`, `applyRangeTransition` and `RangeTransitionResult` are no longer exported, the controller's `internal*` methods are private.
+- Breaking: `selectAll` removed, use `setSelection`.
+
 ## 0.1.3
 
 - Simpler internals: auto-scroll zone computed in one place, data changes mid-gesture re-apply the range from the initial selection instead of tracking keys. No API changes.

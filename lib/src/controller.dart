@@ -1,11 +1,7 @@
-import 'dart:collection';
-
-import 'package:flutter/foundation.dart';
-
-import 'activation.dart';
+part of 'swipe_select.dart';
 
 /// Called when the selection changes: once per gesture (when it ends), and on
-/// every `toggle` / `select` / `deselect` / `setSelection` / `selectAll` / `clear`.
+/// every `toggle` / `select` / `deselect` / `setSelection` / `clear`.
 typedef SelectionChangedCallback<K> = void Function(Set<K> selected, SelectionChangeReason reason);
 
 /// Holds the selection. Listen to it to rebuild your UI.
@@ -66,9 +62,6 @@ class SwipeSelectController<K> extends ChangeNotifier {
 
   void setSelection(Iterable<K> keys) => _commit(Set<K>.of(keys), SelectionChangeReason.api);
 
-  /// Selects every key you pass, e.g. `controller.selectAll(items.map((e) => e.id))`.
-  void selectAll(Iterable<K> keys) => setSelection(keys);
-
   void clear() => _commit(<K>{}, SelectionChangeReason.api);
 
   /// Replaces the selection without calling [onChanged] — for syncing state that
@@ -89,16 +82,12 @@ class SwipeSelectController<K> extends ChangeNotifier {
 
   // ---- used by SwipeSelect ----
 
-  Set<K> get internalSelection => _selected;
-
   /// Gesture step: updates the selection and listeners, no [onChanged].
-  void internalUpdate(Set<K> next) {
+  void _update(Set<K> next) {
     if (identical(next, _selected)) return;
     _selected = next;
     notifyListeners();
   }
-
-  void internalSetAutoScrollDirection(int value) => _autoScrollDirection.value = value;
 
   @override
   void dispose() {
@@ -106,14 +95,14 @@ class SwipeSelectController<K> extends ChangeNotifier {
     super.dispose();
   }
 
-  void internalSetDragging(bool value) {
+  void _setDragging(bool value) {
     if (_isDragging == value) return;
     _isDragging = value;
     notifyListeners();
   }
 
   /// Gesture ended: report once if anything changed.
-  void internalEndGesture(Set<K> initial) {
+  void _endGesture(Set<K> initial) {
     if (!setEquals(initial, _selected)) {
       onChanged?.call(selected, SelectionChangeReason.gesture);
     }
