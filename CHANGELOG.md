@@ -1,3 +1,7 @@
+## 0.1.2
+
+- README: links to the React Native, SwiftUI and Jetpack Compose versions.
+
 ## 0.1.1
 
 - Shorter package description (pub.dev limit is 180 characters).
