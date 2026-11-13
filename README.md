@@ -32,7 +32,7 @@
 - **Plays well with your state.** `onChanged` fires once per gesture — easy to sync with Bloc / Riverpod.
 - **Pure Dart.** No platform code, no dependencies.
 
-> Also available for React Native: [`@mironlive/react-native-swipe-select`](https://www.npmjs.com/package/@mironlive/react-native-swipe-select).
+> Also available for [React Native](https://www.npmjs.com/package/@mironlive/react-native-swipe-select), [SwiftUI](https://github.com/Mironlive/swipe-select-swiftui) and [Jetpack Compose](https://github.com/Mironlive/swipe-select-compose).
 
 ## Installation
 
