@@ -41,3 +41,4 @@ example/ios/Pods/
 example/android/.gradle/
 **/*.iml
 doc/media/android_*
+doc/media/social-preview.png
