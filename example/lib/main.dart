@@ -14,7 +14,10 @@ class ExampleApp extends StatelessWidget {
     return MaterialApp(
       title: 'swipe_select',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(colorSchemeSeed: const Color(0xFF2F6BFF), useMaterial3: true),
+      theme: ThemeData(
+        colorSchemeSeed: const Color(0xFF2F6BFF),
+        useMaterial3: true,
+      ),
       home: const DemoTabs(),
     );
   }
@@ -46,7 +49,10 @@ class DemoTabs extends StatelessWidget {
             tabs: [for (final t in tabs) Tab(text: t.$1)],
           ),
         ),
-        body: TabBarView(physics: const NeverScrollableScrollPhysics(), children: [for (final t in tabs) t.$2]),
+        body: TabBarView(
+          physics: const NeverScrollableScrollPhysics(),
+          children: [for (final t in tabs) t.$2],
+        ),
       ),
     );
   }
@@ -55,7 +61,13 @@ class DemoTabs extends StatelessWidget {
 // ---------------- data ----------------
 
 class Mail {
-  const Mail(this.id, this.from, this.subject, this.lines, {this.locked = false});
+  const Mail(
+    this.id,
+    this.from,
+    this.subject,
+    this.lines, {
+    this.locked = false,
+  });
   final String id;
   final String from;
   final String subject;
@@ -63,8 +75,24 @@ class Mail {
   final bool locked;
 }
 
-const _senders = ['Anna', 'Boris', 'Vika', 'Gleb', 'Dasha', 'Egor', 'Jane', 'Ilya'];
-const _subjects = ['Weekly report', 'Call at 3 pm', 'Invoice #482', 'Vacation plans', 'PR review', 'New design'];
+const _senders = [
+  'Anna',
+  'Boris',
+  'Vika',
+  'Gleb',
+  'Dasha',
+  'Egor',
+  'Jane',
+  'Ilya',
+];
+const _subjects = [
+  'Weekly report',
+  'Call at 3 pm',
+  'Invoice #482',
+  'Vacation plans',
+  'PR review',
+  'New design',
+];
 
 List<Mail> makeMails(int count, {bool withLocked = false}) => [
   for (var i = 0; i < count; i++)
@@ -80,7 +108,12 @@ List<Mail> makeMails(int count, {bool withLocked = false}) => [
 // ---------------- shared UI ----------------
 
 class Toolbar<K> extends StatelessWidget {
-  const Toolbar({super.key, required this.controller, required this.hint, required this.all});
+  const Toolbar({
+    super.key,
+    required this.controller,
+    required this.hint,
+    required this.all,
+  });
   final SwipeSelectController<K> controller;
   final String hint;
   final Iterable<K> Function() all;
@@ -100,15 +133,27 @@ class Toolbar<K> extends StatelessWidget {
                   listenable: controller,
                   builder: (context, _) => Text(
                     'Selected: ${controller.selectedCount}',
-                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                    ),
                   ),
                 ),
                 const Spacer(),
-                TextButton(onPressed: () => controller.setSelection(all()), child: const Text('All')),
-                TextButton(onPressed: controller.clear, child: const Text('Clear')),
+                TextButton(
+                  onPressed: () => controller.setSelection(all()),
+                  child: const Text('All'),
+                ),
+                TextButton(
+                  onPressed: controller.clear,
+                  child: const Text('Clear'),
+                ),
               ],
             ),
-            Text(hint, style: const TextStyle(fontSize: 12, color: Colors.black54)),
+            Text(
+              hint,
+              style: const TextStyle(fontSize: 12, color: Colors.black54),
+            ),
           ],
         ),
       ),
@@ -148,7 +193,9 @@ class MailRow extends StatelessWidget {
                   alignment: Alignment.topCenter,
                   child: Icon(
                     selected ? Icons.check_box : Icons.check_box_outline_blank,
-                    color: mail.locked ? Colors.black26 : (selected ? const Color(0xFF2F6BFF) : Colors.black45),
+                    color: mail.locked
+                        ? Colors.black26
+                        : (selected ? const Color(0xFF2F6BFF) : Colors.black45),
                   ),
                 ),
               ),
@@ -168,7 +215,8 @@ class MailRow extends StatelessWidget {
             Text(mail.subject),
             const SizedBox(height: 4),
             Text(
-              'Message preview that takes one or several lines depending on the email. ' * mail.lines,
+              'Message preview that takes one or several lines depending on the email. ' *
+                  mail.lines,
               maxLines: mail.lines,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(color: Colors.black54, fontSize: 13),
@@ -218,7 +266,8 @@ class _RevealDemoState extends State<RevealDemo> {
             Toolbar(
               controller: controller,
               all: () => mails.map((m) => m.id),
-              hint: 'Hold any email → checkboxes appear → drag along the checkbox column.',
+              hint:
+                  'Hold any email → checkboxes appear → drag along the checkbox column.',
             ),
             Expanded(
               child: SwipeSelect<String>(
@@ -256,7 +305,10 @@ class _RevealDemoState extends State<RevealDemo> {
                     child: Center(
                       child: Text(
                         'Done (${controller.selectedCount})',
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),
@@ -277,7 +329,10 @@ class MailDemo extends StatefulWidget {
 }
 
 class _MailDemoState extends State<MailDemo> {
-  late List<Mail> mails = makeMails(300, withLocked: widget.side == EdgeSide.start);
+  late List<Mail> mails = makeMails(
+    300,
+    withLocked: widget.side == EdgeSide.start,
+  );
   final controller = SwipeSelectController<String>();
   Timer? _incoming;
 
@@ -291,7 +346,15 @@ class _MailDemoState extends State<MailDemo> {
         _incoming = Timer.periodic(const Duration(milliseconds: 1500), (_) {
           n++;
           setState(
-            () => mails = [Mail('new-${DateTime.now().microsecondsSinceEpoch}', 'New', 'Incoming $n', 1), ...mails],
+            () => mails = [
+              Mail(
+                'new-${DateTime.now().microsecondsSinceEpoch}',
+                'New',
+                'Incoming $n',
+                1,
+              ),
+              ...mails,
+            ],
           );
         });
       }
@@ -321,7 +384,11 @@ class _MailDemoState extends State<MailDemo> {
             alignment: Alignment.centerLeft,
             child: TextButton(
               onPressed: _toggleIncoming,
-              child: Text(_incoming != null ? '● New mail is arriving — tap to stop' : 'Simulate incoming mail'),
+              child: Text(
+                _incoming != null
+                    ? '● New mail is arriving — tap to stop'
+                    : 'Simulate incoming mail',
+              ),
             ),
           ),
         Expanded(
@@ -365,7 +432,12 @@ class _GridDemoState extends State<GridDemo> {
   final controller = SwipeSelectController<String>();
   int columns = 4;
 
-  Color colorOf(int i) => HSLColor.fromAHSL(1, ((i * 37) % 360).toDouble(), 0.6, 0.55 + (i % 3) * 0.08).toColor();
+  Color colorOf(int i) => HSLColor.fromAHSL(
+    1,
+    ((i * 37) % 360).toDouble(),
+    0.6,
+    0.55 + (i % 3) * 0.08,
+  ).toColor();
 
   @override
   Widget build(BuildContext context) {
@@ -391,7 +463,8 @@ class _GridDemoState extends State<GridDemo> {
         Toolbar(
           controller: controller,
           all: () => ids,
-          hint: 'Hold a photo → selection mode. Then swipe sideways to select, vertically to scroll.',
+          hint:
+              'Hold a photo → selection mode. Then swipe sideways to select, vertically to scroll.',
         ),
         Expanded(
           child: SwipeSelect<String>(
@@ -412,16 +485,26 @@ class _GridDemoState extends State<GridDemo> {
               itemBuilder: (context, i) => SwipeSelectItem(
                 index: i,
                 builder: (context, selected) => GestureDetector(
-                  onTap: controller.isSelectionMode ? () => controller.toggle(ids[i]) : null,
+                  onTap: () => controller.isSelectionMode
+                      ? controller.toggle(ids[i])
+                      : null,
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      ColoredBox(color: colorOf(i).withValues(alpha: selected ? 0.45 : 1)),
+                      ColoredBox(
+                        color: colorOf(
+                          i,
+                        ).withValues(alpha: selected ? 0.45 : 1),
+                      ),
                       if (selected)
                         const Positioned(
                           right: 6,
                           bottom: 6,
-                          child: Icon(Icons.check_circle, color: Color(0xFF2F6BFF), size: 22),
+                          child: Icon(
+                            Icons.check_circle,
+                            color: Color(0xFF2F6BFF),
+                            size: 22,
+                          ),
                         ),
                     ],
                   ),
@@ -472,6 +555,9 @@ class _ChatDemoState extends State<ChatDemo> {
                   selected: selected,
                   showCheckbox: true,
                   onCheckbox: () => controller.toggle(mails[i].id),
+                  onTap: () => controller.isSelectionMode
+                      ? controller.toggle(mails[i].id)
+                      : null,
                 ),
               ),
             ),
@@ -496,7 +582,11 @@ class _HorizontalDemoState extends State<HorizontalDemo> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Toolbar(controller: controller, all: () => ids, hint: 'Horizontal list: long press, then drag left / right.'),
+        Toolbar(
+          controller: controller,
+          all: () => ids,
+          hint: 'Horizontal list: long press, then drag left / right.',
+        ),
         SizedBox(
           height: 170,
           child: SwipeSelect<String>(
@@ -509,18 +599,36 @@ class _HorizontalDemoState extends State<HorizontalDemo> {
               itemCount: ids.length,
               itemBuilder: (context, i) => SwipeSelectItem(
                 index: i,
-                builder: (context, selected) => Container(
-                  width: 70.0 + (i % 3) * 30,
-                  margin: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: HSLColor.fromAHSL(1, ((i * 37) % 360).toDouble(), 0.6, 0.55).toColor(),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: selected ? const Color(0xFF2F6BFF) : Colors.transparent, width: 4),
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    '${i + 1}',
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                builder: (context, selected) => GestureDetector(
+                  onTap: () => controller.isSelectionMode
+                      ? controller.toggle(ids[i])
+                      : null,
+                  child: Container(
+                    width: 70.0 + (i % 3) * 30,
+                    margin: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: HSLColor.fromAHSL(
+                        1,
+                        ((i * 37) % 360).toDouble(),
+                        0.6,
+                        0.55,
+                      ).toColor(),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: selected
+                            ? const Color(0xFF2F6BFF)
+                            : Colors.transparent,
+                        width: 4,
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      '${i + 1}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 ),
               ),
